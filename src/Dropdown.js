@@ -1,15 +1,40 @@
-import React, { useState } from "react";
-import onClickOutside from "react-onclickoutside";
-import tick from "./tick.svg";
-function Dropdown({ placeholder, options, multiSelect = false }) {
-  // let displayString = "";
-  const [open, setOpen] = useState(false);
-  const [selection, setSelection] = useState([]);
+import React, { useState, useEffect } from "react";
+
+import OptionList from "./OptionList";
+import Header from "./Header";
+import fuzzySearch from "./fuzzySearch";
+import OutsideClickWrapper from "./OutsideClickWrapper";
+
+function Dropdown({
+  classNamePrefix = "dd",
+  placeholder,
+  options,
+  search = false,
+  multiSelect = false,
+  emptyMessage,
+  optionsLimit,
+  alwaysOpen = false,
+  value = [],
+  onChange = () => {
+    "";
+  },
+}) {
+  const [query, setQuery] = useState("");
+  const [showSelected, setShowSelected] = useState(true);
+  const [open, setOpen] = useState(alwaysOpen);
+  const [selection, setSelection] = useState(
+    value.length
+      ? value
+      : placeholder
+      ? []
+      : options
+      ? [options.find((e) => e?.disabled !== true)]
+      : []
+  );
   const toggle = () => setOpen(!open);
-  Dropdown.handleClickOutside = () => setOpen(false);
 
   function handleOnClick(option) {
-    if (!selection.some((current) => current.id === option.id)) {
+    if (!selection.some((current) => current.value === option.value)) {
       if (!multiSelect) {
         setSelection([option]);
       } else if (multiSelect) {
@@ -18,69 +43,58 @@ function Dropdown({ placeholder, options, multiSelect = false }) {
     } else {
       let selectionAfterRemoval = selection;
       selectionAfterRemoval = selectionAfterRemoval.filter(
-        (current) => current.id !== option.id
+        (current) => current.value !== option.value
       );
       setSelection([...selectionAfterRemoval]);
     }
   }
 
-  function isOptionInSelection(option) {
-    if (selection.some((current) => current.id === option.id)) {
-      return true;
-    }
-    return false;
+  const results = fuzzySearch(query, options);
+  const optionsResults = query
+    ? results?.slice(0, optionsLimit).map((result) => result.item)
+    : options?.slice(0, optionsLimit);
+
+  function handleSearchChange({ currentTarget = {} }) {
+    const { value } = currentTarget;
+    setQuery(value);
   }
 
+  useEffect(() => {
+    onChange(selection);
+  }, [selection, onChange]);
+
   return (
-    <div className="dd-wrapper">
-      <div
-        tabIndex={0}
-        className="dd-header"
-        role="button"
-        onKeyPress={() => toggle(!open)}
-        onClick={() => toggle(!open)}
-      >
-        <div className="dd-header__placeholder">
-          {selection.length === 0 ? (
-            <p className="dd-header__placeholder--bold">{placeholder}</p>
-          ) : (
-            <p className="dd-header__placeholder--bold">
-              {selection
-                .reduce((total, curr) => {
-                  return total + ", " + curr.value;
-                }, "")
-                .substring(1)}
-            </p>
-          )}
-        </div>
-        <div className="dd-header__action">
-          <p>{open ? "Close" : "Open"}</p>
-        </div>
+    <OutsideClickWrapper
+      setOpen={setOpen}
+      setShowSelected={setShowSelected}
+      alwaysOpen={alwaysOpen}
+    >
+      <div className="dd-wrapper">
+        <Header
+          toggle={toggle}
+          showSelected={showSelected}
+          setShowSelected={setShowSelected}
+          query={query}
+          handleSearchChange={handleSearchChange}
+          placeholder={placeholder}
+          open={open}
+          setOpen={setOpen}
+          selection={selection}
+          search={search}
+          alwaysOpen={alwaysOpen}
+        />
+
+        {open && (
+          <OptionList
+            selection={selection}
+            handleOnClick={handleOnClick}
+            optionsResults={optionsResults}
+            emptyMessage={emptyMessage}
+          />
+        )}
       </div>
-      {open && (
-        <ul className="dd-list">
-          {options.map((option) => (
-            <li className="dd-list-option" key={option.id}>
-              <button type="button" onClick={() => handleOnClick(option)}>
-                <span>{option.value}</span>
-                {isOptionInSelection(option) ? (
-                  <>
-                    <img src={tick} alt="" width="20px" />
-                  </>
-                ) : (
-                  ""
-                )}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    </OutsideClickWrapper>
   );
 }
 
-const clickOutsideConfig = {
-  handleClickOutside: () => Dropdown.handleClickOutside,
-};
-
-export default onClickOutside(Dropdown, clickOutsideConfig);
+export default Dropdown;

@@ -4,43 +4,60 @@ import Dropdown from "./Dropdown";
 
 const items = [
   {
-    id: 1,
-    value: "Pulp Fiction",
+    value: "pulp",
+    name: "Pulp Fiction",
+    disabled: true,
   },
   {
-    id: 2,
-    value: "The Prestige",
+    value: "prestige",
+    name: "The Prestige",
   },
   {
-    id: 3,
-    value: "Blade Runner 2049",
+    value: "bld",
+    name: "Blade Runner 2049",
   },
   {
-    id: 4,
-    value: "Blade Runner 2049",
+    value: "aot",
+    name: "Attack on Titan",
   },
   {
-    id: 5,
-    value: "Blade Runner 2049",
+    value: "si",
+    name: "Shutter Island",
   },
   {
-    id: 6,
-    value: "Blade Runner 2049",
+    value: "endgame",
+    name: "Avengers Endgame",
   },
   {
-    id: 7,
-    value: "Blade Runner 2049",
+    value: "tr",
+    name: "Thor Ragnarok",
   },
   {
-    id: 8,
-    value: "Blade Runner 2049",
+    value: "ca",
+    name: "Captain America ",
   },
 ];
 
 function App() {
+  // let custom_value = [{ value: "mrz", name: "Mirzapur" }];
+  // const handleOnchangeOutside = (e) => {
+  //   custom_value = e;
+  //   console.log(custom_value);
+  // };
   return (
     <div className="container">
-      <Dropdown placeholder="Choose an Option" options={items} multiSelect />
+      <Dropdown
+        classNamePrefix="dd-custom"
+        // placeholder="Choose an Option"
+        options={items}
+        // search
+        multiSelect
+        // alwaysOpen
+        emptyMessage="Not Found"
+        // optionsLimit="4"
+        // value={custom_value}
+        // onChange={handleOnchangeOutside}
+      />
     </div>
   );
 }
