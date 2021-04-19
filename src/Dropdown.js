@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 import OptionList from "./OptionList";
 import Header from "./Header";
 import fuzzySearch from "./fuzzySearch";
 import OutsideClickWrapper from "./OutsideClickWrapper";
-
+import handleInitialSelection from "./handleInitialSelection";
 function Dropdown({
   classNamePrefix = "dd",
-  placeholder,
+  placeholder = "",
   options,
   search = false,
   multiSelect = false,
@@ -18,38 +18,39 @@ function Dropdown({
   onChange = () => {
     "";
   },
+  grouped = false,
 }) {
   const [query, setQuery] = useState("");
   const [showSelected, setShowSelected] = useState(true);
   const [open, setOpen] = useState(alwaysOpen);
   const [selection, setSelection] = useState(
-    value.length
-      ? value
-      : placeholder
-      ? []
-      : options
-      ? [options.find((e) => e?.disabled !== true)]
-      : []
+    handleInitialSelection(value, placeholder, options, grouped)
   );
   const toggle = () => setOpen(!open);
 
   function handleOnClick(option) {
-    if (!selection.some((current) => current.value === option.value)) {
+    if (!selection.some(({ value }) => value === option.value)) {
       if (!multiSelect) {
         setSelection([option]);
+        onChange([option]);
+        return;
       } else if (multiSelect) {
         setSelection([...selection, option]);
+        onChange([...selection, option]);
+        return;
       }
     } else {
       let selectionAfterRemoval = selection;
       selectionAfterRemoval = selectionAfterRemoval.filter(
-        (current) => current.value !== option.value
+        ({ value }) => value !== option.value
       );
       setSelection([...selectionAfterRemoval]);
+      onChange([...selectionAfterRemoval]);
+      return;
     }
   }
 
-  const results = fuzzySearch(query, options);
+  const results = fuzzySearch(query, options, grouped);
   const optionsResults = query
     ? results?.slice(0, optionsLimit).map((result) => result.item)
     : options?.slice(0, optionsLimit);
@@ -58,10 +59,6 @@ function Dropdown({
     const { value } = currentTarget;
     setQuery(value);
   }
-
-  useEffect(() => {
-    onChange(selection);
-  }, [selection, onChange]);
 
   return (
     <OutsideClickWrapper
@@ -90,6 +87,7 @@ function Dropdown({
             handleOnClick={handleOnClick}
             optionsResults={optionsResults}
             emptyMessage={emptyMessage}
+            grouped={grouped}
           />
         )}
       </div>

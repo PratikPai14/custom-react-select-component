@@ -38,25 +38,46 @@ const items = [
   },
 ];
 
+const groupedOptions = [
+  {
+    label: "Food",
+    options: [
+      { value: "Hmb", name: "Hamburger" },
+      { value: "pizza", name: "Pizza" },
+      { value: "chicken", name: "Fried Chicken" },
+    ],
+  },
+
+  {
+    label: "Drinks",
+    options: [
+      { value: "cola", name: "CocaCola" },
+      { value: "lmnd", name: "Lemonade" },
+      { value: "Beer", name: "Beer" },
+    ],
+  },
+];
+
 function App() {
-  // let custom_value = [{ value: "mrz", name: "Mirzapur" }];
-  // const handleOnchangeOutside = (e) => {
-  //   custom_value = e;
-  //   console.log(custom_value);
-  // };
+  let custom_value = [];
+  const handleOnchangeOutside = (e) => {
+    custom_value = e;
+    console.log(custom_value);
+  };
   return (
     <div className="container">
       <Dropdown
         classNamePrefix="dd-custom"
         // placeholder="Choose an Option"
-        options={items}
-        // search
+        options={groupedOptions}
+        search
         multiSelect
         // alwaysOpen
         emptyMessage="Not Found"
         // optionsLimit="4"
-        // value={custom_value}
-        // onChange={handleOnchangeOutside}
+        value={custom_value}
+        onChange={handleOnchangeOutside}
+        grouped
       />
     </div>
   );
